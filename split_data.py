@@ -9,10 +9,6 @@ def split_data(x, y, ratio, seed=1):
     """
     # set seed
     np.random.seed(seed)
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # split the data based on the given ratio: TODO
-    # ***************************************************
     indices = np.random.permutation(x.shape[0])
     split_index = int(ratio * x.shape[0])
     train_indices = indices[:split_index]
