@@ -68,8 +68,48 @@ def ridge_regression(y, tx, lambda_):
     loss = compute_loss(y, tx, w)
     return w, loss
 
+def sigmoid(t):
+    """apply sigmoid function on t."""
+    return 1.0 / (1 + np.exp(-t))
+    
+def calculate_log_likelihood_loss(y, tx, w):
+    """compute the cost by negative log likelihood."""
+    pred = sigmoid(tx.dot(w))
+    print("y = ", y.shape)
+    print("pred = ", pred.shape)
+    print("np.log(pred).shape = ", np.log(pred).shape)
+    loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
+    print("loss = ", loss.shape)
+    #loss = np.squeeze(- loss)
+    print("loss = ", loss.shape)
+    return loss
+    
+def calculate_gradient_sigmoid(y, tx, w):
+    """compute the gradient of loss."""
+    pred = sigmoid(tx.dot(w))
+    #pred = np.expand_dims(pred, axis=1)
+    print("pred = ", pred.shape)
+    print("tx = ", tx.shape)
+    print("pred - y = ", (pred - y).shape)
+    grad = tx.T.dot(pred - y)
+    
+    print("grad = ", grad.shape)
+    print("w = ", w.shape)
+    return grad
+
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
-    raise NotImplementedError
+    w = initial_w
+    
+    
+    for i in range(max_iters):
+        #print(i)
+        grad = calculate_gradient_sigmoid(y, tx, w)
+        w -= gamma * grad
+        #print(calculate_log_likelihood_loss(y, tx, w))
+   
+    loss = calculate_log_likelihood_loss(y, tx, w)
+    print("loss = ", loss)
+    return w, loss
     
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     raise NotImplementedError
