@@ -2,9 +2,9 @@
 import numpy as np
 from proj1_helpers import *
 
-'''
+"""
 Calculates the classification accuracy for a trained model on a given test set.
-'''
+"""
 def calculate_accuracy(w, x_test, y_test):
     y_pred = predict_labels(w, x_test)
     total_number_predictions = y_pred.size
@@ -35,12 +35,12 @@ def calculate_f1_score(w, x_test, y_test):
     f1_score =  (2 * precision * recall) / (precision + recall)
     return f1_score
 
+"""
+split the dataset based on the split ratio. If ratio is 0.8
+you will have 80% of your data set dedicated to training
+and the rest dedicated to testing
+"""
 def split_data(x, y, ratio, seed=1):
-    """
-    split the dataset based on the split ratio. If ratio is 0.8
-    you will have 80% of your data set dedicated to training
-    and the rest dedicated to testing
-    """
     # set seed
     np.random.seed(seed)
     indices = np.random.permutation(x.shape[0])
@@ -52,3 +52,18 @@ def split_data(x, y, ratio, seed=1):
     train_y = y[train_indices]
     test_y = y[test_indices]
     return train_x, test_x, train_y, test_y
+
+"""
+Group the dataset into k groups of training and test data.
+Use this as a basis for a k-fold cross-validation.
+"""
+def group_data(x, y, groups, seed=1):
+    np.random.seed(seed)
+    indices = np.random.permutation(x.shape[0])
+    split_indices = np.array_split(indices, groups)
+    x_split = []
+    y_split = []
+    for split in split_indices:
+        x_split.append(x[split])
+        y_split.append(y[split])
+    return x_split, y_split
