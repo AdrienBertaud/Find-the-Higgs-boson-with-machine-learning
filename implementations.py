@@ -10,7 +10,7 @@ def standardize(tx):
 
     tx = (tx - means) / derivation
 
-    print(np.max(tx))
+    #print(np.max(tx))
 
     return tx
 
@@ -78,11 +78,16 @@ def ridge_regression(y, tx, lambda_):
 def sigmoid(t):
     """apply sigmoid function on t."""
 
-    print("max = ", max(t))
-    print("min = ", min(t))
+    print("max = ", max(t),"\tmin = ", min(t))
+
+    threshold = 1e2
+    t[t > threshold] = threshold
+    t[t < -threshold] = -threshold
+
+    print("max 2 = ", max(t),"\tmin 2 = ", min(t))
 
     exp = np.exp(-t)
-    print("exp = ",exp.shape)
+    #print("exp = ",exp.shape)
 
     sig = 1.0 / (1 + exp)
     return sig
@@ -100,10 +105,10 @@ def calculate_log_likelihood_loss(y, tx, w):
     pred[np.logical_and((1-pred) >= 0, (1-pred) < threshold)] = threshold
     pred[np.logical_and((1-pred) < 0, (1-pred) > -threshold)] = -threshold
 
-    print("y = ", y.shape)
-    print("pred = ", pred.shape)
-    print("np.log(pred).shape = ", np.log(pred).shape)
-    print("np.log(1-pred).shape = ", np.log(1-pred).shape)
+    #print("y = ", y.shape)
+    #print("pred = ", pred.shape)
+    #print("np.log(pred).shape = ", np.log(pred).shape)
+    #print("np.log(1-pred).shape = ", np.log(1-pred).shape)
 
     loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
     loss = -loss
@@ -116,13 +121,13 @@ def calculate_gradient_sigmoid(y, tx, w):
     """compute the gradient of loss."""
     pred = sigmoid(tx.dot(w))
     #pred = np.expand_dims(pred, axis=1)
-    print("pred = ", pred.shape)
-    print("tx = ", tx.shape)
-    print("pred - y = ", (pred - y).shape)
+    #print("pred = ", pred.shape)
+    #print("tx = ", tx.shape)
+    #print("pred - y = ", (pred - y).shape)
     grad = tx.T.dot(pred - y)
 
-    print("grad = ", grad.shape)
-    print("w = ", w.shape)
+    #print("grad = ", grad.shape)
+    #print("w = ", w.shape)
     return grad
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
@@ -140,12 +145,13 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         w -= gamma * grad
 
         if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            print("loss is not evolving, stopping the loop")
             break
 
         #print(calculate_log_likelihood_loss(y, tx, w))
 
     loss = calculate_log_likelihood_loss(y, tx, w)
-    print("loss = ", loss)
+    #print("loss = ", loss)
     return w, loss
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
