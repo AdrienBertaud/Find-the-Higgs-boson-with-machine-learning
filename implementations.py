@@ -43,7 +43,7 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
 
 def compute_loss(y, tx, w):
     e = y - tx.dot(w)
-    return 1/(2*len(y)) * (e.dot(e))
+    return 1/(2*len(y)) * (e.T.dot(e))
 
 def compute_gradient(y, tx, w):
     return -1/len(y) * np.transpose(tx).dot(y - tx.dot(w))
