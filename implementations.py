@@ -6,7 +6,11 @@ def standardize(tx):
 
     derivation = np.std(tx, axis=0)
 
-    derivation[derivation==0]=1
+    mask_derivation_null = (derivation==0)
+
+    if len(mask_derivation_null) > 0 :
+        print("Warning, derivation are null for indexes ", mask_derivation_null)
+        derivation[mask_derivation_null]=1
 
     tx = (tx - means) / derivation
 
@@ -77,14 +81,17 @@ def ridge_regression(y, tx, lambda_):
 
 def sigmoid(t):
     """apply sigmoid function on t."""
+    threshold = 1e8
 
-    print("max = ", max(t),"\tmin = ", min(t))
+    max_t = max(t)
+    min_t = min(t)
 
-    threshold = 1e2
-    t[t > threshold] = threshold
-    t[t < -threshold] = -threshold
+    if min_t < threshold or max_t > threshold:
+        #print("WARNING: risk of overflow in exp : max = ", max(t),"\tmin = ", min(t))
 
-    print("max 2 = ", max(t),"\tmin 2 = ", min(t))
+        t[t > threshold] = threshold
+        t[t < -threshold] = -threshold
+        #print("Limiting values: max 2 = ", max(t),"\tmin 2 = ", min(t))
 
     exp = np.exp(-t)
     #print("exp = ",exp.shape)
@@ -94,40 +101,46 @@ def sigmoid(t):
 
 def calculate_log_likelihood_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
-    threshold = 1e-4
+    threshold = 1e-8
 
     x_hat = tx.dot(w)
     pred = sigmoid(x_hat)
 
-    pred[np.logical_and(pred >= 0, pred < threshold)] = threshold
-    pred[np.logical_and(pred < 0, pred > -threshold)] = -threshold
+    mask_close_to_zero_positive = np.logical_and(pred >= 0, pred < threshold)
+    mask_close_to_zero_negative = np.logical_and(pred < 0, pred > -threshold)
+    mask_close_to_one_superior = np.logical_and((1-pred) >= 0, (1-pred) < threshold)
+    mask_close_to_one_inferior = np.logical_and((1-pred) < 0, (1-pred) > -threshold)
 
-    pred[np.logical_and((1-pred) >= 0, (1-pred) < threshold)] = threshold
-    pred[np.logical_and((1-pred) < 0, (1-pred) > -threshold)] = -threshold
+    if len(pred[mask_close_to_zero_positive]) > 0 :
+        min_close_to_zero_positive = min(pred[mask_close_to_zero_positive])
+        #Tprint("WARNING, risk of overflow in log : min_close_to_zero_positive = ", min_close_to_zero_positive)
+        pred[mask_close_to_zero_positive] = -threshold
 
-    #print("y = ", y.shape)
-    #print("pred = ", pred.shape)
-    #print("np.log(pred).shape = ", np.log(pred).shape)
-    #print("np.log(1-pred).shape = ", np.log(1-pred).shape)
+    if len(pred[mask_close_to_zero_negative]) > 0 :
+        max_close_to_zero_negative = max(pred[mask_close_to_zero_negative])
+        #print("WARNING, risk of overflow in log : max_close_to_zero_negative = ", max_close_to_zero_negative)
+        pred[mask_close_to_zero_negative] = threshold
+
+    if len(pred[mask_close_to_one_superior]) > 0 :
+        min_close_to_one_superior = min(pred[mask_close_to_one_superior])
+        #print("WARNING, risk of overflow in log : min_close_to_one_superior = ", min_close_to_one_superior)
+        pred[np.logical_and((1-pred) < 0, (1-pred) > -threshold)] = -threshold
+
+    if len(pred[mask_close_to_one_inferior]) > 0 :
+        max_close_to_one_inferior = max(pred[mask_close_to_one_inferior])
+        #print("WARNING, risk of overflow in log : max_close_to_one_inferior = ", max_close_to_one_inferior)
+        pred[mask_close_to_one_inferior] = threshold
 
     loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
     loss = -loss
-    print("loss = ", loss.shape, "\t", loss)
+    #print("loss = ", loss.shape, "\t", loss)
     #loss = np.squeeze(loss)
-    #print("loss = ", loss.shape)
     return loss
 
 def calculate_gradient_sigmoid(y, tx, w):
     """compute the gradient of loss."""
     pred = sigmoid(tx.dot(w))
-    #pred = np.expand_dims(pred, axis=1)
-    #print("pred = ", pred.shape)
-    #print("tx = ", tx.shape)
-    #print("pred - y = ", (pred - y).shape)
     grad = tx.T.dot(pred - y)
-
-    #print("grad = ", grad.shape)
-    #print("w = ", w.shape)
     return grad
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
@@ -136,7 +149,6 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     losses = []
 
     for i in range(max_iters):
-        #print(i)
 
         loss = calculate_log_likelihood_loss(y, tx, w)
         losses.append(loss)
@@ -151,7 +163,6 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         #print(calculate_log_likelihood_loss(y, tx, w))
 
     loss = calculate_log_likelihood_loss(y, tx, w)
-    #print("loss = ", loss)
     return w, loss
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):

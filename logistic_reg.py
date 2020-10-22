@@ -1,4 +1,6 @@
-# Useful starting lines
+import importlib
+import initialize
+importlib.reload(initialize)
 import numpy as np
 import matplotlib.pyplot as plt
 from split_data import split_data
@@ -10,7 +12,7 @@ from initialize import *
 
 x_tr, x_te, y_tr, y_te, w_initial = initialize()
 
-max_iters = 10
+max_iters = 1000
 gamma = 0.05
 
 # Logistic regression

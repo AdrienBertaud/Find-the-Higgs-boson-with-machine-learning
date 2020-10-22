@@ -26,9 +26,6 @@ def initialize():
     # x_te = 0
 
     print("x_tr = ", x_tr.shape)
-
-    max_iters = 10
-    gamma = 0.05
     num_variables = x_tr.shape[1]
 
     # Initialization
