@@ -77,6 +77,7 @@ def ridge_regression(y, tx, lambda_):
     loss = compute_loss(y, tx, w)
     return w, loss
 
+
 def sigmoid(t):
     """apply sigmoid function on t."""
     threshold = 1e2
@@ -115,8 +116,7 @@ def calculate_log_likelihood_loss(y, tx, w):
 
     loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
     loss = -loss
-    #print("loss = ", loss.shape, "\t", loss)
-    #loss = np.squeeze(loss)
+
     return loss
 
 def calculate_gradient_sigmoid(y, tx, w):
@@ -125,28 +125,59 @@ def calculate_gradient_sigmoid(y, tx, w):
     grad = tx.T.dot(pred - y)
     return grad
 
+def learning_by_gradient_descent(y, tx, w, gamma):
+    """
+    Do one step of gradient descent using logistic regression.
+    Return the updated w.
+    """
+    grad = calculate_gradient_sigmoid(y, tx, w)
+    w -= gamma * grad
+    return w
+
+def learning_with_penalty(y, tx, lambda_):
+    w = np.linalg.solve(np.transpose(tx).dot(tx) + (lambda_ / 2 * len(y) * np.identity(tx.shape[1])), np.transpose(tx).dot(y))
+    return w
+
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
     w = initial_w
-    threshold = 1e-8
+    threshold = 1e-20
     losses = []
 
     for i in range(max_iters):
 
-        loss = calculate_log_likelihood_loss(y, tx, w)
-        print(loss)
-        losses.append(loss)
+        w = learning_by_gradient_descent(y, tx, w, gamma)
 
-        grad = calculate_gradient_sigmoid(y, tx, w)
-        w -= gamma * grad
+        if i % 50 == 0:
+            loss = calculate_log_likelihood_loss(y, tx, w)
+            print("Current iteration = {iter}, loss={l}".format(iter=i, l=loss))
 
-        # if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-        #     print("loss is not evolving, stopping the loop at iteration : ", i)
-        #     break
+            losses.append(loss)
 
-        #print(calculate_log_likelihood_loss(y, tx, w))
+            if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+                print("loss is not evolving, stopping the loop at iteration : ", i)
+                break
 
     loss = calculate_log_likelihood_loss(y, tx, w)
     return w, loss
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
-    raise NotImplementedError
+    w = initial_w
+    threshold = 1e-20
+    losses = []
+
+    for i in range(max_iters):
+
+        w = learning_with_penalty(y, tx, w, lambda_)
+
+        if i % 50 == 0:
+            loss = calculate_log_likelihood_loss(y, tx, w)
+            print("Current iteration = {iter}, loss={l}".format(iter=i, l=loss))
+
+            losses.append(loss)
+
+            if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+                print("loss is not evolving, stopping the loop at iteration : ", i)
+                break
+
+    loss = calculate_log_likelihood_loss(y, tx, w)
+    return w, loss
