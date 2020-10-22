@@ -33,7 +33,7 @@ def calculate_f1_score(w, x_test, y_test):
     precision = true_positives / (true_positives + false_positives)
     recall = true_positives / (true_positives + false_negatives)
     f1_score =  (2 * precision * recall) / (precision + recall)
-    return f1_score
+    return f1_score, precision, recall
 
 """
 split the dataset based on the split ratio. If ratio is 0.8
