@@ -1,10 +1,7 @@
-# Useful starting lines
 import numpy as np
-import matplotlib.pyplot as plt
 from split_data import split_data
-from proj1_helpers import *
-from implementations import *
-import datetime
+from proj1_helpers import load_csv_data
+from implementations import standardize
 
 def initialize():
 
@@ -25,12 +22,10 @@ def initialize():
     # y_te = 0
     # x_te = 0
 
-    print("x_tr = ", x_tr.shape)
     num_variables = x_tr.shape[1]
 
     # Initialization
     w_initial = np.array(np.zeros(num_variables))
-    print("w = ", w_initial.shape)
     w_initial = np.expand_dims(w_initial, axis=1)
     print("w = ", w_initial.shape)
 

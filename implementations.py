@@ -8,13 +8,11 @@ def standardize(tx):
 
     mask_derivation_null = (derivation==0)
 
-    if len(mask_derivation_null) > 0 :
-        print("Warning, derivation are null for indexes ", mask_derivation_null)
+    if len(derivation[mask_derivation_null]) > 0 :
+        print("Warning, some derivation are null : ", mask_derivation_null)
         derivation[mask_derivation_null]=1
 
     tx = (tx - means) / derivation
-
-    #print(np.max(tx))
 
     return tx
 
@@ -81,12 +79,12 @@ def ridge_regression(y, tx, lambda_):
 
 def sigmoid(t):
     """apply sigmoid function on t."""
-    threshold = 1e8
+    threshold = 1e2
 
     max_t = max(t)
     min_t = min(t)
 
-    if min_t < threshold or max_t > threshold:
+    if min_t < -threshold or max_t > threshold:
         #print("WARNING: risk of overflow in exp : max = ", max(t),"\tmin = ", min(t))
 
         t[t > threshold] = threshold
@@ -101,35 +99,19 @@ def sigmoid(t):
 
 def calculate_log_likelihood_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
-    threshold = 1e-8
+    threshold = 1e-9
 
     x_hat = tx.dot(w)
     pred = sigmoid(x_hat)
 
-    mask_close_to_zero_positive = np.logical_and(pred >= 0, pred < threshold)
-    mask_close_to_zero_negative = np.logical_and(pred < 0, pred > -threshold)
-    mask_close_to_one_superior = np.logical_and((1-pred) >= 0, (1-pred) < threshold)
-    mask_close_to_one_inferior = np.logical_and((1-pred) < 0, (1-pred) > -threshold)
+    mask_inf_to_min = (pred < threshold)
+    mask_sup_to_max =(pred >= 1-threshold)
 
-    if len(pred[mask_close_to_zero_positive]) > 0 :
-        min_close_to_zero_positive = min(pred[mask_close_to_zero_positive])
-        #Tprint("WARNING, risk of overflow in log : min_close_to_zero_positive = ", min_close_to_zero_positive)
-        pred[mask_close_to_zero_positive] = -threshold
+    if len(pred[mask_inf_to_min]) > 0 :
+        pred[mask_inf_to_min] = threshold
 
-    if len(pred[mask_close_to_zero_negative]) > 0 :
-        max_close_to_zero_negative = max(pred[mask_close_to_zero_negative])
-        #print("WARNING, risk of overflow in log : max_close_to_zero_negative = ", max_close_to_zero_negative)
-        pred[mask_close_to_zero_negative] = threshold
-
-    if len(pred[mask_close_to_one_superior]) > 0 :
-        min_close_to_one_superior = min(pred[mask_close_to_one_superior])
-        #print("WARNING, risk of overflow in log : min_close_to_one_superior = ", min_close_to_one_superior)
-        pred[np.logical_and((1-pred) < 0, (1-pred) > -threshold)] = -threshold
-
-    if len(pred[mask_close_to_one_inferior]) > 0 :
-        max_close_to_one_inferior = max(pred[mask_close_to_one_inferior])
-        #print("WARNING, risk of overflow in log : max_close_to_one_inferior = ", max_close_to_one_inferior)
-        pred[mask_close_to_one_inferior] = threshold
+    if len(pred[mask_sup_to_max]) > 0 :
+        pred[mask_sup_to_max] = 1-threshold
 
     loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
     loss = -loss
@@ -151,14 +133,15 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     for i in range(max_iters):
 
         loss = calculate_log_likelihood_loss(y, tx, w)
+        print(loss)
         losses.append(loss)
 
         grad = calculate_gradient_sigmoid(y, tx, w)
         w -= gamma * grad
 
-        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-            print("loss is not evolving, stopping the loop")
-            break
+        # if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+        #     print("loss is not evolving, stopping the loop at iteration : ", i)
+        #     break
 
         #print(calculate_log_likelihood_loss(y, tx, w))
 
