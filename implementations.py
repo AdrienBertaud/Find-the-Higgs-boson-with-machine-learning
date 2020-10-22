@@ -2,17 +2,28 @@
 import numpy as np
 
 def standardize(tx):
-    means = np.mean(tx, axis=0)
 
-    derivation = np.std(tx, axis=0)
+    threshold = 0.1
+    value_to_remove = -999
 
-    mask_derivation_null = (derivation==0)
+    for i in range(tx.shape[1]):
 
-    if len(derivation[mask_derivation_null]) > 0 :
-        print("Warning, some derivation are null : ", mask_derivation_null)
-        derivation[mask_derivation_null]=1
+        col = tx[:,i]
 
-    tx = (tx - means) / derivation
+        clean_col = col[col != value_to_remove]
+
+        mean = np.mean(clean_col, axis=0)
+
+        col[col == value_to_remove] = mean
+
+        derivation = np.std(clean_col, axis=0)
+
+        tx[:,i] = (col - mean)
+
+        if derivation < threshold :
+            print("Warning, derivation is too small, we don't normalize by derivation the column ", i)
+        else:
+            tx[:,i] = tx[:,i] / derivation
 
     return tx
 
@@ -46,7 +57,8 @@ def compute_loss(y, tx, w):
     return 1/(2*len(y)) * (e.T.dot(e))
 
 def compute_gradient(y, tx, w):
-    return -1/len(y) * np.transpose(tx).dot(y - tx.dot(w))
+    err = y - tx.dot(w)
+    return -1/len(y) * tx.T.dot(err)
 
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     w = initial_w
@@ -125,23 +137,12 @@ def calculate_gradient_sigmoid(y, tx, w):
     grad = tx.T.dot(pred - y)
     return grad
 
-def calculate_gradient_sigmoid_with_penalty_term(y, tx, w, lambda_):
-    """compute the gradient of loss."""
-    pred = sigmoid(tx.dot(w))
-    grad = calculate_log_likelihood_loss(y, tx, w) + lambda_/2*w.T.dot(w)
-    return grad
-
 def learning_by_gradient_descent(y, tx, w, gamma):
     """
     Do one step of gradient descent using logistic regression.
     Return the updated w.
     """
     grad = calculate_gradient_sigmoid(y, tx, w)
-    w -= gamma * grad
-    return w
-
-def learning_with_penalty(y, tx, w, gamma, lambda_):
-    grad = calculate_gradient_sigmoid_with_penalty_term(y, tx, w, lambda_)
     w -= gamma * grad
     return w
 
@@ -154,8 +155,6 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
 
     for i in range(max_iters):
 
-        w = learning_by_gradient_descent(y, tx, w, gamma)
-
         if i % 50 == 0:
             loss = calculate_log_likelihood_loss(y, tx, w)
             print("Current iteration = {iter}, loss={l}".format(iter=i, l=loss))
@@ -166,8 +165,21 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
                 print("loss is not evolving, stopping the loop at iteration : ", i)
                 break
 
+        w = learning_by_gradient_descent(y, tx, w, gamma)
+
     loss = calculate_log_likelihood_loss(y, tx, w)
     return w, loss
+
+def calculate_grad_sigmoid_with_penalty(y, tx, w, lambda_):
+    """compute the gradient of loss."""
+    pred = sigmoid(tx.dot(w))
+    grad = calculate_gradient_sigmoid(y, tx, w) + 2 * lambda_ * w
+    return grad
+
+def learning_by_GD_with_penalty(y, tx, w, gamma, lambda_):
+    grad = calculate_grad_sigmoid_with_penalty(y, tx, w, lambda_)
+    w -= gamma * grad
+    return w
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     w = initial_w
@@ -178,10 +190,8 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
     for i in range(max_iters):
 
-        w = learning_with_penalty(y, tx, w, gamma, lambda_)
-
         if i % 50 == 0:
-            loss = calculate_log_likelihood_loss(y, tx, w)
+            loss = calculate_log_likelihood_loss(y, tx, w) + lambda_ * w.T.dot(w)
             print("Current iteration = {iter}, loss={l}".format(iter=i, l=loss))
 
             # losses.append(loss)
@@ -189,6 +199,9 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
             # if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
             #     print("loss is not evolving, stopping the loop at iteration : ", i)
             #     break
+
+        w = learning_by_GD_with_penalty(y, tx, w, gamma, lambda_)
+        #print(w)
 
     loss = calculate_log_likelihood_loss(y, tx, w)
     return w, loss

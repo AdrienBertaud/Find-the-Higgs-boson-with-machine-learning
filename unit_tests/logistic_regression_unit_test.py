@@ -1,3 +1,5 @@
+import sys
+sys.path.append("..") # Adds higher directory to python modules path.
 import importlib
 import initialize
 import implementations
@@ -7,7 +9,7 @@ from implementations import logistic_regression, reg_logistic_regression
 import datetime
 from initialize import initialize
 
-x_tr, x_te, y_tr, y_te, w_initial = initialize()
+x_tr, x_te, y_tr, y_te, w_initial = initialize(data_train_path='../data/train500.csv', split_ratio = 0.5)
 
 max_iters = 1000
 gamma = 0.05
