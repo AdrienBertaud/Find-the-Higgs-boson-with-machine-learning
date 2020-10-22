@@ -125,6 +125,12 @@ def calculate_gradient_sigmoid(y, tx, w):
     grad = tx.T.dot(pred - y)
     return grad
 
+def calculate_gradient_sigmoid_with_penalty_term(y, tx, w, lambda_):
+    """compute the gradient of loss."""
+    pred = sigmoid(tx.dot(w))
+    grad = calculate_log_likelihood_loss(y, tx, w) + lambda_/2*w.T.dot(w)
+    return grad
+
 def learning_by_gradient_descent(y, tx, w, gamma):
     """
     Do one step of gradient descent using logistic regression.
@@ -134,8 +140,9 @@ def learning_by_gradient_descent(y, tx, w, gamma):
     w -= gamma * grad
     return w
 
-def learning_with_penalty(y, tx, lambda_):
-    w = np.linalg.solve(np.transpose(tx).dot(tx) + (lambda_ / 2 * len(y) * np.identity(tx.shape[1])), np.transpose(tx).dot(y))
+def learning_with_penalty(y, tx, w, gamma, lambda_):
+    grad = calculate_gradient_sigmoid_with_penalty_term(y, tx, w, lambda_)
+    w -= gamma * grad
     return w
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
@@ -167,7 +174,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
     for i in range(max_iters):
 
-        w = learning_with_penalty(y, tx, w, lambda_)
+        w = learning_with_penalty(y, tx, w, gamma, lambda_)
 
         if i % 50 == 0:
             loss = calculate_log_likelihood_loss(y, tx, w)
