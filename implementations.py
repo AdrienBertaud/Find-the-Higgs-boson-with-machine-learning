@@ -150,6 +150,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     threshold = 1e-20
     losses = []
 
+    y[y<0]=0
+
     for i in range(max_iters):
 
         w = learning_by_gradient_descent(y, tx, w, gamma)
@@ -169,8 +171,10 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     w = initial_w
-    threshold = 1e-20
-    losses = []
+    # threshold = 1e-20
+    # losses = []
+
+    y[y<0]=0
 
     for i in range(max_iters):
 
@@ -180,11 +184,11 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
             loss = calculate_log_likelihood_loss(y, tx, w)
             print("Current iteration = {iter}, loss={l}".format(iter=i, l=loss))
 
-            losses.append(loss)
+            # losses.append(loss)
 
-            if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-                print("loss is not evolving, stopping the loop at iteration : ", i)
-                break
+            # if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            #     print("loss is not evolving, stopping the loop at iteration : ", i)
+            #     break
 
     loss = calculate_log_likelihood_loss(y, tx, w)
     return w, loss
