@@ -1,14 +1,17 @@
 import numpy as np
 from split_data import split_data
 from proj1_helpers import load_csv_data
-from implementations import standardize
+from implementations import standardize, remove_rows_with_faulty_values
 
-def initialize(data_train_path='data/train.csv', split_ratio = 0.8, data_test_path='data/test.csv'):
+def initialize(data_train_path='data/train.csv', split_ratio = 0.8, data_test_path='data/test.csv', remove_rows=False):
 
     y, tX, ids = load_csv_data(data_train_path)
     y = np.expand_dims(y, axis=1)
     
     _, tX_test, ids_test = load_csv_data(data_test_path)
+    
+    if (remove_rows):
+        tX = remove_rows_with_faulty_values(tX)
     
     # Standardize data
     x_tr, tX_test = standardize(tX, tX_test)
