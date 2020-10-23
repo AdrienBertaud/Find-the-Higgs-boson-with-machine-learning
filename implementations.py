@@ -31,6 +31,22 @@ def standardize(tx, tX_test):
 
     return tx, tX_test
 
+def remove_rows_with_faulty_values(tx):
+    is_valid = np.zeros(tx.shape[0])
+
+    rows_without_error = 0
+    for i in range(tx.shape[0]):
+        contains_no_error = True
+        for j in range(tx.shape[1]):
+            if (tx[i,j] == -999):
+                contains_no_error = False
+                break
+        if (contains_no_error):
+            is_valid[i] = 1
+            rows_without_error = rows_without_error + 1
+    print('rows_without_error: ', rows_without_error)
+    return tx[is_valid == 1]
+
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """
     Generate a minibatch iterator for a dataset.
