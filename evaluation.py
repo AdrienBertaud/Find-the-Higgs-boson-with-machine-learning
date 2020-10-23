@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from proj1_helpers import *
+from implementations import *
 
 """
 Calculates the classification accuracy for a trained model on a given test set.
@@ -67,3 +68,67 @@ def group_data(x, y, groups, seed=1):
         x_split.append(x[split])
         y_split.append(y[split])
     return x_split, y_split
+
+"""
+Execute a k-fold cross validation on a given dataset with a given method and given parameters.
+"""
+def cross_val(tX, y, splits, method, **kwargs):
+    # create dict with results for run
+    cv_result = {}
+    cv_result['method'] = 'least_squares_GD'
+    cv_result['parameters'] = kwargs
+    cv_result['train_losses'] = []
+    cv_result['test_losses'] = []
+    cv_result['accuracies'] = []
+    cv_result['f1_scores'] = []
+    cv_result['precisions'] = []
+    cv_result['recalls'] = []
+    cv_result['confusion_matrices'] = []
+    
+    x_split, y_split = group_data(tX, y, splits)
+    for i in range(len(x_split)):
+        x_train = []
+        y_train = []
+        x_test = []
+        y_test = []
+        cv_run_result = {}
+        for j in range(len(x_split)):
+            if i == j:
+                x_test.append(x_split[i])
+                y_test.append(y_split[i])
+            else:
+                x_train.append(x_split[i])
+                y_train.append(y_split[i])
+            
+        x_train = np.concatenate(x_train)
+        y_train = np.concatenate(y_train)
+        x_test = np.concatenate(x_test)
+        y_test = np.concatenate(y_test)
+                
+        w, loss_train = method(y_train, x_train, **kwargs)
+        loss_test = compute_loss(y_test, x_test, w)
+        
+        cv_result['train_losses'].append(loss_train)
+        cv_result['test_losses'].append(loss_test)
+        cv_result['accuracies'].append(calculate_accuracy(w, x_test, y_test))
+        f1_score, precision, recall, tp, fp, tn, fn = calculate_f1_score(w, x_test, y_test)
+        cv_result['f1_scores'].append(f1_score)
+        cv_result['precisions'].append(precision)
+        cv_result['recalls'].append(recall)
+        confusion_matrix = {'tp': tp, 'fp': fp, 'tn': tn, 'fn': fn}
+        cv_result['confusion_matrices'].append(confusion_matrix)
+        
+    cv_result['mean_train_loss'] = np.array(cv_result['train_losses']).mean()
+    cv_result['std_train_loss'] = np.array(cv_result['train_losses']).std()
+    cv_result['mean_test_loss'] = np.array(cv_result['test_losses']).mean()
+    cv_result['std_test_loss'] = np.array(cv_result['test_losses']).std()
+    cv_result['mean_accuracy'] = np.array(cv_result['accuracies']).mean()
+    cv_result['std_accuracy'] = np.array(cv_result['accuracies']).std()
+    cv_result['mean_f1_score'] = np.array(cv_result['f1_scores']).mean()
+    cv_result['std_f1_score'] = np.array(cv_result['f1_scores']).std()
+    cv_result['mean_precision'] = np.array(cv_result['precisions']).mean()
+    cv_result['std_precision'] = np.array(cv_result['precisions']).std()
+    cv_result['mean_recall'] = np.array(cv_result['recalls']).mean()
+    cv_result['std_recall'] = np.array(cv_result['recalls']).std()
+        
+    return cv_result
