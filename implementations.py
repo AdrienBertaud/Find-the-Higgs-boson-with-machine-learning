@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
-def standardize(tx):
+def standardize(tx, tX_test):
 
     threshold = 0.1
     value_to_remove = -999
@@ -9,23 +9,27 @@ def standardize(tx):
     for i in range(tx.shape[1]):
 
         col = tx[:,i]
+        col_te = tX_test[:,i]
 
         clean_col = col[col != value_to_remove]
 
         mean = np.mean(clean_col, axis=0)
 
         col[col == value_to_remove] = mean
+        col_te[col_te == value_to_remove] = mean
 
         derivation = np.std(clean_col, axis=0)
 
         tx[:,i] = (col - mean)
+        tX_test[:,i] = (col_te - mean)
 
         if derivation < threshold :
             print("Warning, derivation is too small, we don't normalize by derivation the column ", i)
         else:
             tx[:,i] = tx[:,i] / derivation
+            tX_test[:,i] = tX_test[:,i] / derivation
 
-    return tx
+    return tx, tX_test
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """
