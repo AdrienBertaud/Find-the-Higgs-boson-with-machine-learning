@@ -72,7 +72,7 @@ def group_data(x, y, groups, seed=1):
 """
 Execute a k-fold cross validation on a given dataset with a given method and given parameters.
 """
-def cross_val(tX, y, splits, method, **kwargs):
+def cross_val(tX, y, splits, poly_degree, method, **kwargs):
     # create dict with results for run
     cv_result = {}
     cv_result['method'] = 'least_squares_GD'
@@ -104,6 +104,9 @@ def cross_val(tX, y, splits, method, **kwargs):
         y_train = np.concatenate(y_train)
         x_test = np.concatenate(x_test)
         y_test = np.concatenate(y_test)
+        
+        x_train = build_poly(x_train, poly_degree)
+        x_test = build_poly(x_test, poly_degree)
         
         x_train, x_test = standardize(x_train, x_test)
         x_train = np.hstack((x_train, np.ones((x_train.shape[0], 1))))
