@@ -4,7 +4,7 @@ import sys
 
 sys.path.append("..") # Adds higher directory to python modules path.
 
-from implementations import standardize
+from implementations import get_standardization_values, apply_standardization
 
 def standardize_unit_test():
 
@@ -14,7 +14,8 @@ def standardize_unit_test():
                     [-999, -999, -999],
                     [2, 9, 10]])
 
-    x = standardize(x)
+    means, derivations = get_standardization_values(x)
+    x = apply_standardization(x, means, derivations)
 
     print(x)
 
