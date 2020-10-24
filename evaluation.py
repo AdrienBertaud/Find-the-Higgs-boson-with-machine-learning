@@ -104,6 +104,8 @@ def cross_val(tX, y, splits, method, **kwargs):
         y_train = np.concatenate(y_train)
         x_test = np.concatenate(x_test)
         y_test = np.concatenate(y_test)
+        
+        x_train, x_test = standardize(x_train, x_test)
                 
         w, loss_train = method(y_train, x_train, **kwargs)
         loss_test = compute_loss(y_test, x_test, w)
