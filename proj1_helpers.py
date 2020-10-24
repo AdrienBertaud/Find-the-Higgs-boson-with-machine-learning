@@ -14,12 +14,13 @@ def load_csv_data(data_path, sub_sample=False):
     # convert class labels from strings to binary (-1,1)
     yb = np.ones(len(y))
     yb[np.where(y=='b')] = -1
-    
+
     # sub-sample
     if sub_sample:
-        yb = yb[::50]
-        input_data = input_data[::50]
-        ids = ids[::50]
+        sub_sample_length = 2
+        yb = yb[::sub_sample_length]
+        input_data = input_data[::sub_sample_length]
+        ids = ids[::sub_sample_length]
 
     return yb, input_data, ids
 
@@ -29,7 +30,7 @@ def predict_labels(weights, data):
     y_pred = np.dot(data, weights)
     y_pred[np.where(y_pred <= 0)] = -1
     y_pred[np.where(y_pred > 0)] = 1
-    
+
     return y_pred
 
 
