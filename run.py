@@ -12,7 +12,15 @@ DATA_TEST_PATH = 'data/test.csv'
 _, tX_test, ids_test = load_csv_data(DATA_TEST_PATH)
 
 # PREPROCESSING
+
+## Polynomial expansion
+tX = build_poly(tX, 10)
+tX_test = build_poly(tX_test, 10)
+
+## Standardization
 tX, tX_test = standardize(tX, tX_test)
+
+## Adding column of ones
 tX = np.hstack((tX, np.ones((tX.shape[0], 1))))
 tX_test = np.hstack((tX_test, np.ones((tX_test.shape[0], 1))))
 
