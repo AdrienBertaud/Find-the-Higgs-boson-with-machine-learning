@@ -81,6 +81,14 @@ def apply_standardization(tx, means, derivations):
 
     return tx
 
+def build_poly(tx,d):
+    result = tx
+    for degree in range(2,d+1):
+        expansion = tx**degree
+        expansion[tx == -999] = -999
+        result = np.hstack((result,expansion))
+    return result
+
 def remove_rows_with_faulty_values(tx):
     is_valid = np.zeros(tx.shape[0])
 
@@ -96,6 +104,22 @@ def remove_rows_with_faulty_values(tx):
             rows_without_error = rows_without_error + 1
     print('rows_without_error: ', rows_without_error)
     return tx[is_valid == 1]
+
+def remove_columns_with_faulty_values(tx):
+    is_valid = np.zeros(tx.shape[1])
+    
+    columns_without_error = 0
+    for j in range(tx.shape[1]):
+        contains_no_error = True
+        for i in range(tx.shape[0]):
+            if (tx[i,j] == -999):
+                contains_no_error = False
+                break
+        if (contains_no_error):
+            is_valid[j] = 1
+            columns_without_error = columns_without_error + 1
+    print('columns_without_error: ', columns_without_error)
+    return is_valid
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """
