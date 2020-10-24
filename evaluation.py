@@ -2,6 +2,7 @@
 import numpy as np
 from proj1_helpers import *
 from implementations import *
+import random
 
 """
 Calculates the classification accuracy for a trained model on a given test set.
@@ -69,6 +70,34 @@ def group_data(x, y, groups, seed=1):
         y_split.append(y[split])
     return x_split, y_split
 
+
+def equalize_true_false(x, y):
+    mask_y_false = np.squeeze(np.array(y <= 0))
+    mask_y_true = np.squeeze(np.array(y > 0))
+
+    y_false = y[mask_y_false]
+    y_true = np.squeeze(y[mask_y_true])
+
+    x_true = x[mask_y_true,:]
+    x_false = x[mask_y_false,:]
+
+    diff = len(y_false)-len(y_true)
+
+    indexes_to_remove = random.sample(range(1, len(y_false)), diff)
+
+    x_false_equal = np.array(np.delete(x_false, indexes_to_remove,0))
+
+    y_false_equal = np.array(np.delete(y_false, indexes_to_remove))
+
+    x_equal = np.concatenate((x_true, x_false_equal))
+    y_equal = np.concatenate((y_true, y_false_equal))
+
+    p = np.random.permutation(len(x_equal))
+    x_permut = x_equal[p]
+    y_permut = y_equal[p]
+
+    return x_permut, y_permut
+
 """
 Execute a k-fold cross validation on a given dataset with a given method and given parameters.
 """
@@ -84,7 +113,7 @@ def cross_val(tX, y, splits, method, **kwargs):
     cv_result['precisions'] = []
     cv_result['recalls'] = []
     cv_result['confusion_matrices'] = []
-    
+
     x_split, y_split = group_data(tX, y, splits)
     for i in range(len(x_split)):
         x_train = []
@@ -99,19 +128,21 @@ def cross_val(tX, y, splits, method, **kwargs):
             else:
                 x_train.append(x_split[i])
                 y_train.append(y_split[i])
-            
+
         x_train = np.concatenate(x_train)
         y_train = np.concatenate(y_train)
         x_test = np.concatenate(x_test)
         y_test = np.concatenate(y_test)
-        
+
+        x_train, y_train = equalize_true_false(x_train, y_train)
+
         x_train, x_test = standardize(x_train, x_test)
         x_train = np.hstack((x_train, np.ones((x_train.shape[0], 1))))
         x_test = np.hstack((x_test, np.ones((x_test.shape[0], 1))))
-                
+
         w, loss_train = method(y_train, x_train, **kwargs)
         loss_test = compute_loss(y_test, x_test, w)
-        
+
         cv_result['train_losses'].append(loss_train)
         cv_result['test_losses'].append(loss_test)
         cv_result['accuracies'].append(calculate_accuracy(w, x_test, y_test))
@@ -121,7 +152,7 @@ def cross_val(tX, y, splits, method, **kwargs):
         cv_result['recalls'].append(recall)
         confusion_matrix = {'tp': tp, 'fp': fp, 'tn': tn, 'fn': fn}
         cv_result['confusion_matrices'].append(confusion_matrix)
-        
+
     cv_result['mean_train_loss'] = np.array(cv_result['train_losses']).mean()
     cv_result['std_train_loss'] = np.array(cv_result['train_losses']).std()
     cv_result['mean_test_loss'] = np.array(cv_result['test_losses']).mean()
@@ -134,5 +165,5 @@ def cross_val(tX, y, splits, method, **kwargs):
     cv_result['std_precision'] = np.array(cv_result['precisions']).std()
     cv_result['mean_recall'] = np.array(cv_result['recalls']).mean()
     cv_result['std_recall'] = np.array(cv_result['recalls']).std()
-        
+
     return cv_result

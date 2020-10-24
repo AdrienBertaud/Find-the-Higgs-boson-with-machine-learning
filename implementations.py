@@ -26,10 +26,10 @@ def standardize(tx, tX_test):
         col[col == value_to_remove] = mean
         col_te[col_te == value_to_remove] = mean
 
-        derivation = np.std(clean_col, axis=0)
-
         tx[:,i] = (col - mean)
         tX_test[:,i] = (col_te - mean)
+
+        derivation = np.std(clean_col, axis=0)
 
         if derivation < threshold :
             print("Warning, derivation is too small, we don't normalize by derivation the column ", i)
@@ -38,48 +38,6 @@ def standardize(tx, tX_test):
             tX_test[:,i] = tX_test[:,i] / derivation
 
     return tx, tX_test
-
-def get_standardization_values(tx):
-
-    value_to_remove = -999
-    means = []
-    derivations = []
-
-    for i in range(tx.shape[1]):
-
-        col = tx[:,i]
-
-        clean_col = col[col != value_to_remove]
-
-        mean = np.mean(clean_col, axis=0)
-        means.append(mean)
-
-        derivation = np.std(clean_col, axis=0)
-        derivations.append(derivation)
-
-    return means, derivations
-
-def apply_standardization(tx, means, derivations):
-
-    threshold = 0.1
-    value_to_remove = -999
-
-    for i in range(tx.shape[1]):
-
-        col = tx[:,i]
-
-        clean_col = col[col != value_to_remove]
-
-        col[col == value_to_remove] = means[i]
-
-        tx[:,i] = (col - means[i])
-
-        if derivations[i] < threshold :
-            print("Warning, derivation is too small, we don't normalize by derivation the column ", i)
-        else:
-            tx[:,i] = tx[:,i] / derivations[i]
-
-    return tx
 
 def remove_rows_with_faulty_values(tx):
     is_valid = np.zeros(tx.shape[0])
