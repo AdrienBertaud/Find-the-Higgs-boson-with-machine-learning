@@ -101,7 +101,7 @@ def equalize_true_false(x, y):
 """
 Execute a k-fold cross validation on a given dataset with a given method and given parameters.
 """
-def cross_val(tX, y, equalize = false, splits, poly_degree, method, **kwargs):
+def cross_val(tX, y, equalize, splits, poly_degree, method, **kwargs):
     # create dict with results for run
     cv_result = {}
     cv_result['method'] = 'least_squares_GD'
