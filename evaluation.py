@@ -104,7 +104,8 @@ Execute a k-fold cross validation on a given dataset with a given method and giv
 def cross_val(tX, y, equalize, splits, poly_degree, method, **kwargs):
     # create dict with results for run
     cv_result = {}
-    cv_result['method'] = 'least_squares_GD'
+    cv_result['method'] = method.__name__
+    cv_result['poly_degree'] = poly_degree
     cv_result['parameters'] = kwargs
     cv_result['train_losses'] = []
     cv_result['test_losses'] = []
