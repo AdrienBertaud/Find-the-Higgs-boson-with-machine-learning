@@ -101,7 +101,7 @@ def equalize_true_false(x, y):
 """
 Execute a k-fold cross validation on a given dataset with a given method and given parameters.
 """
-def cross_val(tX, y, splits, poly_degree, method, **kwargs):
+def cross_val(tX, y, equalize = false, splits, poly_degree, method, **kwargs):
     # create dict with results for run
     cv_result = {}
     cv_result['method'] = 'least_squares_GD'
@@ -134,11 +134,12 @@ def cross_val(tX, y, splits, poly_degree, method, **kwargs):
         x_test = np.concatenate(x_test)
         y_test = np.concatenate(y_test)
 
-        x_train, y_train = equalize_true_false(x_train, y_train)
-        
+        if equalize == True:
+            x_train, y_train = equalize_true_false(x_train, y_train)
+
         x_train = build_poly(x_train, poly_degree)
         x_test = build_poly(x_test, poly_degree)
-        
+
         x_train, x_test = standardize(x_train, x_test)
         x_train = np.hstack((x_train, np.ones((x_train.shape[0], 1))))
         x_test = np.hstack((x_test, np.ones((x_test.shape[0], 1))))
