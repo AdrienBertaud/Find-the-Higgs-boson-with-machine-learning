@@ -14,8 +14,8 @@ _, tX_test, ids_test = load_csv_data(DATA_TEST_PATH)
 # PREPROCESSING
 
 ## Polynomial expansion
-tX = build_poly(tX, 10)
-tX_test = build_poly(tX_test, 10)
+tX = build_poly(tX, 14)
+tX_test = build_poly(tX_test, 14)
 
 ## Standardization
 tX, tX_test = standardize(tX, tX_test)
