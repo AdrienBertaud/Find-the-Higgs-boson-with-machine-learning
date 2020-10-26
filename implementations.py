@@ -231,7 +231,6 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
 
 def calculate_grad_sigmoid_with_penalty(y, tx, w, lambda_):
     """Compute the gradient with simoid activation and penalty term."""
-    pred = sigmoid(tx.dot(w))
     grad = calculate_gradient_sigmoid(y, tx, w) + 2 * lambda_ * w
     return grad
 
