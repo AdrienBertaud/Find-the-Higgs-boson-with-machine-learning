@@ -4,7 +4,7 @@ import numpy as np
 
 def standardize(tx, tX_test):
     """
-     We do the standardization by subtracting the mean and dividing by the standard derivation for each dimension to get features which have a mean of 0 and a standard derivation of 1.
+    We do the standardization by subtracting the mean and dividing by the standard derivation for each dimension to get features which have a mean of 0 and a standard derivation of 1.
 
     Some values of features in the dataset are set to $-999$ to indicate an error in the measurement.
     To handle the error values we compute standardization means and variances without taking into account those error values and then replace error values by zero.
