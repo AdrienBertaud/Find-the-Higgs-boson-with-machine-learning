@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
+'''
+def standardize(tX, tX_test):
+    means, derivations = get_standardization_values(tX)
+    tX = apply_standardization(tX, means, derivations)
+    tX_test = apply_standardization(tX, means, derivations)
+    return tX, tX_test
+'''
 
 def standardize(tx, tX_test):
-    """
-     We do the standardization by subtracting the mean and dividing by the standard derivation for each dimension to get features which have a mean of 0 and a standard derivation of 1.
-
-    Some values of features in the dataset are set to $-999$ to indicate an error in the measurement.
-    To handle the error values we compute standardization means and variances without taking into account those error values and then replace error values by zero.
-    """
 
     threshold = 0.1
     value_to_remove = -999
@@ -39,8 +40,6 @@ def standardize(tx, tX_test):
     return tx, tX_test
 
 def build_poly(tx,d):
-    """ Compute polynomial expansion of degree d"""
-
     result = tx
     for degree in range(2,d+1):
         expansion = tx**degree
@@ -49,7 +48,6 @@ def build_poly(tx,d):
     return result
 
 def remove_rows_with_faulty_values(tx):
-    """ Remove rows containing - 999 """
     is_valid = np.zeros(tx.shape[0])
 
     rows_without_error = 0
@@ -66,9 +64,8 @@ def remove_rows_with_faulty_values(tx):
     return tx[is_valid == 1]
 
 def remove_columns_with_faulty_values(tx):
-    """ Remove columns containing - 999 """
     is_valid = np.zeros(tx.shape[1])
-
+    
     columns_without_error = 0
     for j in range(tx.shape[1]):
         contains_no_error = True
@@ -90,6 +87,7 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     Data can be randomly shuffled to avoid ordering in the original data messing with the randomness of the minibatches.
     Example of use :
     for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
+        <DO-SOMETHING>
     """
     data_size = len(y)
 
@@ -107,17 +105,14 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
 def compute_loss(y, tx, w):
-    """ Compute MSE loss"""
     e = y - tx.dot(w)
     return 1/(2*len(y)) * (e.T.dot(e))
 
 def compute_gradient(y, tx, w):
-    """ Compute gradient """
     err = y - tx.dot(w)
     return -1/len(y) * tx.T.dot(err)
 
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
-    """ Least squares regression with gradient descent """
     w = initial_w
 
     for n_iter in range(max_iters):
@@ -127,7 +122,6 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     return w, loss
 
 def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
-    """ Least squares regression with stochastic gradient descent """
     w = initial_w
 
     for n_iter in range(max_iters):
@@ -138,19 +132,18 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     return w, loss
 
 def least_squares(y, tx):
-    """ Least squares regression using normal equations"""
     w = np.linalg.solve(np.transpose(tx).dot(tx), np.transpose(tx).dot(y))
     loss = compute_loss(y, tx, w)
     return w, loss
 
 def ridge_regression(y, tx, lambda_):
-    """ Ridge regression using normal equations"""
     w = np.linalg.solve(np.transpose(tx).dot(tx) + (lambda_ * 2 * len(y) * np.identity(tx.shape[1])), np.transpose(tx).dot(y))
     loss = compute_loss(y, tx, w)
     return w, loss
 
+
 def sigmoid(t):
-    """Apply sigmoid function on t."""
+    """apply sigmoid function on t."""
     threshold = 1e2
 
     max_t = max(t)
@@ -170,7 +163,7 @@ def sigmoid(t):
     return sig
 
 def calculate_log_likelihood_loss(y, tx, w):
-    """Compute the loss by negative log likelihood."""
+    """compute the cost by negative log likelihood."""
     threshold = 1e-9
 
     x_hat = tx.dot(w)
@@ -191,21 +184,21 @@ def calculate_log_likelihood_loss(y, tx, w):
     return loss
 
 def calculate_gradient_sigmoid(y, tx, w):
-    """Compute the gradient of loss with sigmoid activation."""
+    """compute the gradient of loss."""
     pred = sigmoid(tx.dot(w))
     grad = tx.T.dot(pred - y)
     return grad
 
 def learning_by_gradient_descent(y, tx, w, gamma):
     """
-    Do one step of gradient descent using logistic regression with gradient descent and return the updated w.
+    Do one step of gradient descent using logistic regression.
+    Return the updated w.
     """
     grad = calculate_gradient_sigmoid(y, tx, w)
     w -= gamma * grad
     return w
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
-    """Logistic regression using gradient descent."""
     w = initial_w
     threshold = 1e-20
     losses = []
@@ -216,12 +209,12 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
 
         if i % 50 == 0:
             loss = calculate_log_likelihood_loss(y, tx, w)
-            print("Iteration = ", i, "\tloss = ", loss)
+            print("Current iteration = {iter}, loss={l}".format(iter=i, l=loss))
 
             losses.append(loss)
 
             if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
-                print("Loss is not evolving, stopping the loop at iteration : ", i)
+                print("loss is not evolving, stopping the loop at iteration : ", i)
                 break
 
         w = learning_by_gradient_descent(y, tx, w, gamma)
@@ -230,19 +223,20 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     return w, loss
 
 def calculate_grad_sigmoid_with_penalty(y, tx, w, lambda_):
-    """Compute the gradient with simoid activation and penalty term."""
+    """compute the gradient of loss."""
+    pred = sigmoid(tx.dot(w))
     grad = calculate_gradient_sigmoid(y, tx, w) + 2 * lambda_ * w
     return grad
 
 def learning_by_GD_with_penalty(y, tx, w, gamma, lambda_):
-    """Compute the gradient descent with simoid activation and penalty term."""
     grad = calculate_grad_sigmoid_with_penalty(y, tx, w, lambda_)
     w -= gamma * grad
     return w
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
-    """Regularized logistic regression using gradient descent."""
     w = initial_w
+    # threshold = 1e-20
+    # losses = []
 
     y[y<0]=0
 
@@ -250,9 +244,16 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
         if i % 50 == 0:
             loss = calculate_log_likelihood_loss(y, tx, w) + lambda_ * w.T.dot(w)
-            print("Iteration = ", i, "\tloss = ", loss)
+            print("Current iteration = {iter}, loss={l}".format(iter=i, l=loss))
+
+            # losses.append(loss)
+
+            # if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            #     print("loss is not evolving, stopping the loop at iteration : ", i)
+            #     break
 
         w = learning_by_GD_with_penalty(y, tx, w, gamma, lambda_)
+        #print(w)
 
     loss = calculate_log_likelihood_loss(y, tx, w)
     return w, loss

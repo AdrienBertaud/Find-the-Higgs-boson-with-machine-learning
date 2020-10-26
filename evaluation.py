@@ -4,10 +4,10 @@ from proj1_helpers import *
 from implementations import *
 import random
 
+"""
+Calculates the classification accuracy for a trained model on a given test set.
+"""
 def calculate_accuracy(w, x_test, y_test):
-    """
-    Calculates the classification accuracy for a trained model on a given test set.
-    """
     y_pred = predict_labels(w, x_test)
     total_number_predictions = y_pred.size
     numer_correct_predictions = 0
@@ -18,9 +18,6 @@ def calculate_accuracy(w, x_test, y_test):
     return accuracy
 
 def calculate_f1_score(w, x_test, y_test):
-    """
-    Calculates the F1 scores.
-    """
     y_pred = predict_labels(w, x_test)
     true_positives = 0
     false_positives = 0
@@ -40,13 +37,12 @@ def calculate_f1_score(w, x_test, y_test):
     f1_score =  (2 * precision * recall) / (precision + recall)
     return f1_score, precision, recall, true_positives, false_positives, true_negatives, false_negatives
 
-
+"""
+split the dataset based on the split ratio. If ratio is 0.8
+you will have 80% of your data set dedicated to training
+and the rest dedicated to testing
+"""
 def split_data(x, y, ratio, seed=1):
-    """
-    Split the dataset based on the split ratio. If ratio is 0.8
-    you will have 80% of your data set dedicated to training
-    and the rest dedicated to testing.
-    """
     # set seed
     np.random.seed(seed)
     indices = np.random.permutation(x.shape[0])
@@ -59,12 +55,11 @@ def split_data(x, y, ratio, seed=1):
     test_y = y[test_indices]
     return train_x, test_x, train_y, test_y
 
-
+"""
+Group the dataset into k groups of training and test data.
+Use this as a basis for a k-fold cross-validation.
+"""
 def group_data(x, y, groups, seed=1):
-    """
-    Group the dataset into k groups of training and test data.
-    Use this as a basis for a k-fold cross-validation.
-    """
     np.random.seed(seed)
     indices = np.random.permutation(x.shape[0])
     split_indices = np.array_split(indices, groups)
@@ -77,9 +72,6 @@ def group_data(x, y, groups, seed=1):
 
 
 def equalize_true_false(x, y):
-    """
-    Equalize the number "true" and "false" of binary classification in the dataset. The function is expecting having more "false" than "true".
-    """
     mask_y_false = np.squeeze(np.array(y <= 0))
     mask_y_true = np.squeeze(np.array(y > 0))
 
@@ -106,12 +98,10 @@ def equalize_true_false(x, y):
 
     return x_permut, y_permut
 
-
+"""
+Execute a k-fold cross validation on a given dataset with a given method and given parameters.
+"""
 def cross_val(tX, y, equalize, splits, poly_degree, method, **kwargs):
-    """
-    Execute a k-fold cross validation on a given dataset with a given method and given parameters.
-    """
-
     # create dict with results for run
     cv_result = {}
     cv_result['method'] = method.__name__
