@@ -32,6 +32,6 @@ The codebase is splitted into several files with different contents:
 * **proj1_helpers.py**: functions provided for the project 1 like loading the data
 
 ## Notation
-* ** Feedbacks.pdf
+* **Feedbacks.pdf**
 
 
