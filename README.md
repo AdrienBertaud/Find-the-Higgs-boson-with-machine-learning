@@ -9,11 +9,11 @@ This directory contains all code necessary to rerun our tests and get the model 
 
 ## Report
 
-* ** ML_P1_Find_the_Higgs.pdf
+* ** ML_P1_Find_the_Higgs.pdf**
 
 ## Versions
-* **Python 3.7.6
-* **NumPy 1.18.1
+* **Python** 3.7.6
+* **NumPy** 1.18.1
 
 ## Usage
 
