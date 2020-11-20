@@ -11,11 +11,14 @@ This directory contains all code necessary to rerun our tests and get the model 
 
 * **ML_P1_Find_the_Higgs.pdf**
 
-## Versions
-* **Python** 3.7.6
-* **NumPy** 1.18.1
+## Notation
+* **Feedbacks.pdf**
 
 ## Usage
+
+Code was developed with the following versions:
+* **Python** 3.7.6
+* **NumPy** 1.18.1
 
 To run the code that generates our predictions, first copy the the train and test datasets to /data/train.csv and /data/test.csv. It then suffices to run `run.py`, the predictions are then stored in result/result.csv.
 
@@ -31,7 +34,6 @@ The codebase is splitted into several files with different contents:
 * **evaluation.py**: functions to do the evaluation, such as splitting the data, the cross validation and computing different metrics
 * **proj1_helpers.py**: functions provided for the project 1 like loading the data
 
-## Notation
-* **Feedbacks.pdf**
+
 
 
