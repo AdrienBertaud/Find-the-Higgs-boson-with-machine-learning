@@ -1,11 +1,18 @@
 # Machine Learning Project 1: Find the Higgs boson
 
-This directory contains all code necessary to rerun our tests and get the model that we submitted on [AIcrowd challenge](https://www.aicrowd.com/challenges/epfl-machine-learning-higgs).
 ## Contributors
 
 * Florian Grötschla
 * Adrien Bertaud
 * Maximilian Wessendorf
+
+## Description
+
+This directory contains all code necessary to rerun our tests and get a model that we submitted on [AIcrowd challenge](https://www.aicrowd.com/challenges/epfl-machine-learning-higgs).
+
+The goal of this challenge is to train a binary classifier to identify the appearance of the Higgs boson on a dataset of decay signatures from CERN. We compare various machine learning methods and apply different preprocessing steps that were introduced in class.
+
+Finally, we fit a classification model with the least squares method that scores an accuracy of 0.82 and a F1-score of 0.722.
 
 ## Report
 
